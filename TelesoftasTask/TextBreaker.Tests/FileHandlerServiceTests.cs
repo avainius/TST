@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
 using TextBreaker.Interfaces;
 using TextBreaker.Services;
 
@@ -35,7 +35,7 @@ namespace TextBreaker.Tests
         }
 
         [TestMethod]
-        public void CreateFileIfNotExists_CreatesNonExistingFile_FileCreated()
+        public void CreateFileIfNotExists_CreatesNewFile_FileCreated()
         {
             if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
 
@@ -45,13 +45,38 @@ namespace TextBreaker.Tests
         }
 
         [TestMethod]
+        public void CreateFileIfNotExists_CreatesNewFile_FileNotInUse()
+        {
+            if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
+
+            fileHandler.CreateFileIfNotExists(path);
+
+            FileStream stream = null;
+            try
+            {
+                stream = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.None);
+                Assert.IsTrue(stream != null);
+            }
+            catch (IOException e)
+            {
+                Assert.Fail(e.Message);
+            }
+            finally
+            {
+                if (stream != null)
+                    stream.Close();
+            }
+        }
+
+        [TestMethod]
         public void AppendTextToFile_AppendsTextToFile_AppendsSuccessfully()
         {
             if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
             if (!File.Exists(path)) File.Create(path).Close();
             var fileText = string.Empty;
+            var expectedResult = textToAppend;
 
-            fileHandler.AppendTextToFile(textToAppend, path);
+            fileHandler.AppendLinesToFile(path, new List<string> { expectedResult });
 
             using (var stream = new StreamReader(path))
             {
@@ -61,7 +86,19 @@ namespace TextBreaker.Tests
                 }
             }
 
-            Assert.AreEqual(fileText, textToAppend);
+            Assert.AreEqual(expectedResult, fileText);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(FileNotFoundException))]
+        public void AppendTextToFile_AppendsTextToNonExistingFile_ThrowsFileNotFoundException()
+        {
+            if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
+            if (!File.Exists(path)) File.Create(path).Close();
+            var fileText = string.Empty;
+            var expectedResult = textToAppend;
+
+            fileHandler.AppendLinesToFile($"{AppDomain.CurrentDomain.BaseDirectory}{Guid.NewGuid()}.test", new List<string> { expectedResult });
         }
 
         [TestCleanup]
