@@ -6,6 +6,7 @@ namespace TextBreaker.Interfaces
     {
         List<string> BreakText(string path, int maxCharCount, string outputPath = null);
         List<string> BreakLine(string text, int maxCharCount);
+        List<string> BreakLongWord(string word, int maxCharCount);
         List<string> GetFileText(string path);
     }
 }

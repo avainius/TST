@@ -44,10 +44,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Interfaces\IFileHandler.cs" />
     <Compile Include="Interfaces\ITextHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Services\FileHandlerService.cs" />
     <Compile Include="Services\TextHandlerService.cs" />
   </ItemGroup>
   <ItemGroup>

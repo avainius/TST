@@ -30,20 +30,58 @@ namespace TextBreaker.Tests
         public void BreakLine_TriesToBreakLine_BreakesLineCorrectly()
         {
             var maxLineLength = 5;
-            var expectedResult = new List<string>();
-            expectedResult.Add("Words");
-            expectedResult.Add("can b");
-            expectedResult.Add("e lik");
-            expectedResult.Add("e bri");
-            expectedResult.Add("cks -");
-            expectedResult.Add("bad f");
-            expectedResult.Add("or yo");
-            expectedResult.Add("ur te");
-            expectedResult.Add("eth.");
+            var expectedResult = new List<string>
+            {
+                "Words",
+                "can",
+                "be",
+                "like",
+                "brick",
+                "s -",
+                "bad",
+                "for",
+                "your",
+                "teeth",
+                "."
+            };
 
             var actualResult = textHandler.BreakLine(text, maxLineLength);
 
-            AssertListUniformityValues(expectedResult, actualResult);
+            AssertListUniformity(expectedResult, actualResult);
+        }
+
+        [TestMethod]
+        public void BreakLine_TriesToBreakTelesoftasExample1Line_BreakesLineCorrectly()
+        {
+            var maxLineLength = 7;
+            text = "šiuolaikiškas ir mano žodis";
+            var expectedResult = new List<string>
+            {
+                "šiuolai",
+                "kiškas",
+                "ir mano",
+                "žodis"
+            };
+
+            var actualResult = textHandler.BreakLine(text, maxLineLength);
+
+            AssertListUniformity(expectedResult, actualResult);
+        }
+
+        [TestMethod]
+        public void BreakLine_TriesToBreakTelesoftasExample2Line_BreakesLineCorrectly()
+        {
+            var maxLineLength = 13;
+            text = "žodis žodis žodis";
+            var expectedResult = new List<string>
+            {
+                "žodis žodis",
+                "žodis"
+            };
+
+            var actualResult = textHandler.BreakLine(text, maxLineLength);
+
+            AssertListUniformity(expectedResult, actualResult);
         }
 
         [TestMethod]
@@ -51,15 +89,17 @@ namespace TextBreaker.Tests
         {
             var actualResult = new List<string>();
             var maxLineLength = 6;
-            var expectedResult = new List<string>();
-            expectedResult.Add("Words");
-            expectedResult.Add("can be");
-            expectedResult.Add("like b");
-            expectedResult.Add("ricks");
-            expectedResult.Add("- bad");
-            expectedResult.Add("for yo");
-            expectedResult.Add("ur tee");
-            expectedResult.Add("th.");
+            var expectedResult = new List<string>
+            {
+                "Words",
+                "can be",
+                "like",
+                "bricks",
+                "- bad",
+                "for",
+                "your",
+                "teeth."
+            };
             if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
             if (!File.Exists(path)) File.Create(path).Close();
             File.AppendAllText(path, text);
@@ -75,7 +115,7 @@ namespace TextBreaker.Tests
                 }
             }
 
-            AssertListUniformityValues(expectedResult, actualResult);
+            AssertListUniformity(expectedResult, actualResult);
         }
 
         [TestMethod]
@@ -83,13 +123,16 @@ namespace TextBreaker.Tests
         {
             var actualResult = new List<string>();
             var maxLineLength = 8;
-            var expectedResult = new List<string>();
-            expectedResult.Add("Words ca");
-            expectedResult.Add("n be lik");
-            expectedResult.Add("e bricks");
-            expectedResult.Add("- bad fo");
-            expectedResult.Add("r your t");
-            expectedResult.Add("eeth.");
+            var expectedResult = new List<string>
+            {
+                "Words",
+                "can be",
+                "like",
+                "bricks -",
+                "bad for",
+                "your",
+                "teeth."
+            };
             if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
             if (!File.Exists(path)) File.Create(path).Close();
             File.AppendAllText(path, text);
@@ -105,29 +148,27 @@ namespace TextBreaker.Tests
                 }
             }
 
-            AssertListUniformityValues(expectedResult, actualResult);
+            AssertListUniformity(expectedResult, actualResult);
 
-            AssertListUniformityValues(expectedResult, result);
+            AssertListUniformity(expectedResult, result);
         }
 
         [TestMethod]
         public void GetFileText_RetrievesTextLineFromFile_RetrieveSuccess()
         {
-            var actualResult = new List<string>();
             var expectedResult = new List<string>() { text };
             if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
             if (!File.Exists(path)) File.Create(path).Close();
             File.AppendAllText(path, text);
 
-            actualResult = textHandler.GetFileText(path);
+            var actualResult = textHandler.GetFileText(path);
 
-            AssertListUniformityValues(expectedResult, actualResult);
+            AssertListUniformity(expectedResult, actualResult);
         }
 
         [TestMethod]
         public void GetFileText_RetrievesTextLinesFromFile_RetrieveSuccess()
         {
-            var actualResult = new List<string>();
             var expectedResult = new List<string>()
             {
                 "Lots of values to return.",
@@ -139,9 +180,28 @@ namespace TextBreaker.Tests
             if (!File.Exists(path)) File.Create(path).Close();
             File.AppendAllLines(path, expectedResult);
 
-            actualResult = textHandler.GetFileText(path);
+            var actualResult = textHandler.GetFileText(path);
 
-            AssertListUniformityValues(expectedResult, actualResult);
+            AssertListUniformity(expectedResult, actualResult);
+        }
+
+        [TestMethod]
+        public void BreakLongWord_BreaksWordExceedingLineLength_Success()
+        {
+            var actualWord = "nebeprisikiškiakopūstėliaudamiesi";
+            var maxCharCount = 7;
+            var expectedResult = new List<string>()
+            {
+                "nebepri",
+                "sikiški",
+                "akopūst",
+                "ėliauda",
+                "miesi"
+            };
+
+            var actualResult = textHandler.BreakLongWord(actualWord, maxCharCount);
+
+            AssertListUniformity(expectedResult, actualResult);
         }
 
         [TestMethod]
@@ -159,7 +219,7 @@ namespace TextBreaker.Tests
             if (Directory.Exists(dir)) Directory.Delete(dir, true);
         }
 
-        private void AssertListUniformityValues(List<string> expectedResult, List<string> actualResult)
+        private void AssertListUniformity(List<string> expectedResult, List<string> actualResult)
         {
             Assert.AreEqual(expectedResult.Count, actualResult.Count);
             for (var i = 0; i < expectedResult.Count; i++)

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using TextBreaker.Interfaces;
 
@@ -10,18 +9,51 @@ namespace TextBreaker.Services
         public List<string> BreakLine(string text, int maxCharCount)
         {
             var result = new List<string>();
-            var chars = text.ToCharArray();
-            var length = text.Length;
-            if(length <= maxCharCount) { result.Add(text); return result; }
-
-            var i = 0;
-            while(i < length)
+            if(text.Length <= maxCharCount) { result.Add(text); return result; }
+            var words = text.Split(' ');
+            foreach(var currentWord in  words)
             {
-                while (string.IsNullOrWhiteSpace(text.Substring(i, 1))) i++;
-                if (text.Substring(i).Length < maxCharCount)
-                    result.Add(text.Substring(i).TrimStart().TrimEnd());
+                if(currentWord.Length > maxCharCount)
+                {
+                    var brokenWord = BreakLongWord(currentWord, maxCharCount);
+                    brokenWord.ForEach(result.Add);
+                    continue;
+                }
+
+                if (result.Count == 0)
+                {
+                    result.Add(currentWord);
+                    continue;
+                }
+
+                var lastWord = result[result.Count - 1];
+                var potentialLastLineLength = lastWord.Length + currentWord.Length + 1;
+                if (potentialLastLineLength <= maxCharCount)
+                {
+                    result[result.Count - 1] = $"{lastWord} {currentWord}";
+                    continue;
+                }
+
+                result.Add(currentWord);
+            }
+
+            return result;
+        }
+
+        public List<string> BreakLongWord(string word, int maxCharCount)
+        {
+            if (word.Length <= maxCharCount) return new List<string>() { word };
+            var result = new List<string>();
+            var i = 0;
+            while(i < word.Length)
+            {
+                if(word.Substring(i).Length <= maxCharCount)
+                {
+                    result.Add(word.Substring(i));
+                    break;
+                }
                 else
-                    result.Add(text.Substring(i, maxCharCount).TrimStart().TrimEnd());
+                    result.Add(word.Substring(i, maxCharCount));
                 i += maxCharCount;
             }
 
