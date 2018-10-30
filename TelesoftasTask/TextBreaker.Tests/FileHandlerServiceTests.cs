@@ -93,12 +93,8 @@ namespace TextBreaker.Tests
         [ExpectedException(typeof(FileNotFoundException))]
         public void AppendTextToFile_AppendsTextToNonExistingFile_ThrowsFileNotFoundException()
         {
-            if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
-            if (!File.Exists(path)) File.Create(path).Close();
-            var fileText = string.Empty;
-            var expectedResult = textToAppend;
-
-            fileHandler.AppendLinesToFile($"{AppDomain.CurrentDomain.BaseDirectory}{Guid.NewGuid()}.test", new List<string> { expectedResult });
+            if (File.Exists(path)) File.Delete(path);
+            fileHandler.AppendLinesToFile(path, new List<string>());
         }
 
         [TestCleanup]
